@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SML Dashboard — Enerwave · April 2026</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<!-- ============================================================
+  POWER BI INTEGRATION GUIDE
+  ============================================================
+  This section (window.SML_DATA) is the single integration point.
+  
+  In Power BI, replace this entire block with a DAX measure:
+  
+  HTML_Data_JSON = 
+    "{""mybrand"":""Enerwave""," &
+    """buzz_curr"":{""Enerwave"":" & [Buzz Enerwave] & ",...}," &
+    ...
+    "}"
+  
+  Then in HTML Content visual, reference it as:
+    window.SML_DATA = JSON.parse(VALUES('MeasureTable'[HTML_Data_JSON])[0])
+  
+  Dimensions expected from your PBI model:
+    - Calendar[Month], Calendar[MonthName]
+    - Queries[query_name]  → brands
+    - Channels[channel]
+    - Sentiment[sentiment]
+    - Emotions[emotion]
+    - BMUI[bmu_category]
+    - BMUI_Influencers[tier]
+    - TopicSlicer[tag]
+  ============================================================ -->
+
+<script>
+// ============================================================
+// POWER BI INTEGRATION
+// The HTML Content visual replaces {{HTML_SML_JSON}} with the
+// live DAX measure value at render time.
+//
+// FOR STANDALONE USE (without Power BI):
+// Replace the line below with: window.SML_DATA = { ...hardcoded data... }
+// ============================================================
+try {
+  window.SML_DATA = JSON.parse('{{HTML_SML_JSON}}');
+} catch(e) {
+  // Fallback: synthetic data for standalone preview
+  window.SML_DATA = {"mybrand":"Enerwave","period":"April 2026","period_prev":"March 2026","brands":["Enerwave","HERON","NRG","Protergia","Volton","ΖeniΘ","ΔΕΗ","Φ.Α.Ε.Ε."],"bcolors":{"Enerwave":"#af2eff","HERON":"#243a78","NRG":"#31DDFF","Protergia":"#ffab33","Volton":"#00af66","ΖeniΘ":"#cf003d","ΔΕΗ":"#fa4616","Φ.Α.Ε.Ε.":"#0077C8"},"buzz_curr":{"Enerwave":397,"HERON":277,"NRG":236,"Protergia":341,"Volton":235,"ΖeniΘ":222,"ΔΕΗ":811,"Φ.Α.Ε.Ε.":308},"buzz_prev":{"Enerwave":320,"HERON":231,"NRG":198,"Protergia":290,"Volton":201,"ΖeniΘ":185,"ΔΕΗ":672,"Φ.Α.Ε.Ε.":262},"total_curr":2827,"total_prev":2359,"sov_curr":{"Enerwave":14.0,"HERON":9.8,"NRG":8.3,"Protergia":12.1,"Volton":8.3,"ΖeniΘ":7.9,"ΔΕΗ":28.7,"Φ.Α.Ε.Ε.":10.9},"sov_prev":{"Enerwave":13.6,"HERON":9.8,"NRG":8.4,"Protergia":12.3,"Volton":8.5,"ΖeniΘ":7.8,"ΔΕΗ":28.5,"Φ.Α.Ε.Ε.":11.1},"months":["Nov","Dec","Jan","Feb","Mar","Apr"],"sov_evo":{"Enerwave":[13.1,13.4,13.2,13.5,13.6,14.0],"HERON":[9.5,9.6,9.7,9.8,9.8,9.8],"NRG":[8.2,8.3,8.3,8.4,8.4,8.3],"Protergia":[12.0,12.1,12.2,12.3,12.3,12.1],"Volton":[8.4,8.4,8.5,8.5,8.5,8.3],"ΖeniΘ":[7.7,7.8,7.8,7.8,7.8,7.9],"ΔΕΗ":[29.2,28.8,28.7,28.5,28.5,28.7],"Φ.Α.Ε.Ε.":[11.9,11.6,11.6,11.2,11.1,10.9]},"monthly":{"Enerwave":[246,268,257,280,320,397],"HERON":[170,182,176,196,231,277],"NRG":[148,159,152,173,198,236],"Protergia":[215,231,224,248,290,341],"Volton":[152,160,158,176,201,235],"ΖeniΘ":[139,148,144,160,185,222],"ΔΕΗ":[523,548,534,576,672,811],"Φ.Α.Ε.Ε.":[213,220,217,228,262,308]},"emv_curr":{"Enerwave":98420,"HERON":71200,"NRG":58900,"Protergia":87500,"Volton":61300,"ΖeniΘ":52800,"ΔΕΗ":228400,"Φ.Α.Ε.Ε.":79600},"emv_prev":{"Enerwave":76800,"HERON":55900,"NRG":45200,"Protergia":70100,"Volton":48600,"ΖeniΘ":41300,"ΔΕΗ":178200,"Φ.Α.Ε.Ε.":62400},"impact":{"Enerwave":0.412,"HERON":0.368,"NRG":0.331,"Protergia":0.388,"Volton":0.344,"ΖeniΘ":0.318,"ΔΕΗ":0.356,"Φ.Α.Ε.Ε.":0.371},"sentiment":{"Enerwave":{"Positive":56.0,"Neutral":27.0,"Negative":17.0},"HERON":{"Positive":44.0,"Neutral":29.0,"Negative":27.0},"NRG":{"Positive":41.0,"Neutral":33.0,"Negative":26.0},"Protergia":{"Positive":48.0,"Neutral":30.0,"Negative":22.0},"Volton":{"Positive":45.0,"Neutral":32.0,"Negative":23.0},"ΖeniΘ":{"Positive":38.0,"Neutral":31.0,"Negative":31.0},"ΔΕΗ":{"Positive":52.0,"Neutral":28.0,"Negative":20.0},"Φ.Α.Ε.Ε.":{"Positive":43.0,"Neutral":34.0,"Negative":23.0}},"emo_curr":{"Neutral":151,"Happiness":99,"Anger":68,"Sadness":48,"Fear":31},"emo_colors":{"Neutral":"#A89FD4","Happiness":"#FFD166","Anger":"#EF4444","Sadness":"#60A5FA","Fear":"#8B5CF6"},"daily":{"1":11,"2":14,"3":9,"4":16,"5":12,"6":8,"7":13,"8":38,"9":10,"10":14,"11":12,"12":9,"13":15,"14":11,"15":8,"16":14,"17":41,"18":13,"19":10,"20":16,"21":12,"22":9,"23":45,"24":14,"25":11,"26":13,"27":9,"28":52,"29":12,"30":15},"ch_buzz":{"News":598,"Instagram":362,"Facebook":308,"Twitter/X":287,"Forums":241,"Blogs":222,"TikTok":216,"LinkedIn":128,"Threads":107,"Reviews":99,"Reddit":135,"Podcasts":47,"YouTube":47},"ch_colors":{"News":"#6366f1","Instagram":"#e1306c","Facebook":"#1877f2","Twitter/X":"#1da1f2","Forums":"#ff6314","Blogs":"#6B7280","TikTok":"#222222","LinkedIn":"#0077b5","Threads":"#9A48D0","Reviews":"#F4A261","Reddit":"#ff4500","Podcasts":"#8B5CF6","YouTube":"#EF4444"},"bmu_buzz":{"Media":1243,"UGC":749,"Nano-influencers":257,"Mid-tier":166,"Micro-influencers":150,"Brand":121,"Macro-influencers":96,"Mega-influencers":45},"bmu_colors":{"Media":"#af2eff","UGC":"#31DDFF","Nano-influencers":"#00af66","Mid-tier":"#C4B5F4","Micro-influencers":"#6DD5E8","Brand":"#ffab33","Macro-influencers":"#D4A0C8","Mega-influencers":"#cf003d"},"tags":["E-mobility","Energy Market","Bills & Pmts","Corporate","Sustainability","Renewables","Customer Svc","Pricing"],"tag_data":{"E-mobility":{"Positive":82,"Neutral":51,"Negative":22},"Energy Market":{"Positive":91,"Neutral":54,"Negative":31},"Bills & Pmts":{"Positive":48,"Neutral":42,"Negative":67},"Corporate":{"Positive":94,"Neutral":61,"Negative":38},"Sustainability":{"Positive":78,"Neutral":48,"Negative":29},"Renewables":{"Positive":86,"Neutral":44,"Negative":28},"Customer Svc":{"Positive":59,"Neutral":47,"Negative":52},"Pricing":{"Positive":52,"Neutral":39,"Negative":48}},"inf_data":[{"tier":"Nano","buzz":257,"engagement":6958000,"emv":616800,"eff":27078},{"tier":"Micro","buzz":150,"engagement":4800000,"emv":382500,"eff":32000},{"tier":"Mid-tier","buzz":166,"engagement":5331200,"emv":381800,"eff":32115},{"tier":"Macro","buzz":96,"engagement":3110400,"emv":230400,"eff":32400},{"tier":"Mega","buzz":45,"engagement":945000,"emv":94500,"eff":21000}],"top_posts":[{"rank":1,"brand":"ΔΕΗ","channel":"TikTok","sentiment":"Positive","tag":"E-mobility","eng":108400,"emv":"€2,100"},{"rank":2,"brand":"Enerwave","channel":"Instagram","sentiment":"Positive","tag":"Renewables","eng":97200,"emv":"€1,840"},{"rank":3,"brand":"Protergia","channel":"Twitter/X","sentiment":"Positive","tag":"Corporate","eng":92800,"emv":"€1,560"},{"rank":4,"brand":"ΔΕΗ","channel":"YouTube","sentiment":"Neutral","tag":"Energy Market","eng":89400,"emv":"€980"},{"rank":5,"brand":"Enerwave","channel":"LinkedIn","sentiment":"Positive","tag":"Sustainability","eng":86100,"emv":"€1,320"},{"rank":6,"brand":"HERON","channel":"Reddit","sentiment":"Negative","tag":"Bills & Pmts","eng":83700,"emv":"€620"},{"rank":7,"brand":"Φ.Α.Ε.Ε.","channel":"Facebook","sentiment":"Neutral","tag":"Pricing","eng":81200,"emv":"€740"},{"rank":8,"brand":"NRG","channel":"TikTok","sentiment":"Positive","tag":"E-mobility","eng":79800,"emv":"€1,100"},{"rank":9,"brand":"Volton","channel":"Instagram","sentiment":"Positive","tag":"Renewables","eng":77400,"emv":"€950"},{"rank":10,"brand":"ΖeniΘ","channel":"Forums","sentiment":"Negative","tag":"Customer Svc","eng":74900,"emv":"€480"}]};
+}
+</script>
+
+<style>
+:root{
+  --bg:radial-gradient(ellipse at 50% 35%,#f5f3ff 0%,#eae7f5 45%,#dddaf0 100%);
+  --sf:rgba(255,255,255,0.78);--sf2:rgba(245,242,255,0.65);
+  --bd:rgba(123,95,191,0.11);--bd2:rgba(123,95,191,0.22);
+  --tx:#2d2440;--tx2:#7063a0;--tx3:#a89fd4;
+  --ac:#af2eff;--ac2:#d68aff;
+  --pos:#5BC8A0;--neg:#E07090;--neu:#A89FD4;
+  --sh:0 2px 16px rgba(100,80,180,.10),0 1px 4px rgba(100,80,180,.07);
+  --shl:0 8px 40px rgba(80,60,160,.16),0 2px 8px rgba(80,60,160,.09);
+  --gl:blur(14px);--cr:14px;--hh:56px;
+}
+[data-theme="dark"]{
+  --bg:radial-gradient(ellipse at 50% 35%,#1e0a38 0%,#130820 48%,#0a0514 100%);
+  --sf:rgba(35,15,65,0.78);--sf2:rgba(50,25,85,0.6);
+  --bd:rgba(175,46,255,0.13);--bd2:rgba(175,46,255,0.25);
+  --tx:#f0e8ff;--tx2:#c4a8e8;--tx3:#8060a8;
+  --sh:0 2px 16px rgba(0,0,0,.5),0 1px 4px rgba(0,0,0,.35);
+  --shl:0 8px 40px rgba(0,0,0,.65),0 2px 8px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);background-attachment:fixed;color:var(--tx);overflow-x:hidden;transition:background .4s,color .3s;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+.hdr,.sb,.main{position:relative;z-index:1;}
+
+/* HEADER */
+.hdr{position:fixed;top:0;left:0;right:0;height:var(--hh);background:var(--sf);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-bottom:1px solid var(--bd2);display:flex;align-items:center;padding:0 14px;gap:10px;z-index:200;}
+.hbtn{width:34px;height:34px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:9px;color:var(--tx2);font-size:19px;transition:background .2s;}
+.hbtn:hover{background:var(--sf2);}
+.htitle{font-size:14px;font-weight:600;color:var(--tx);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pbadge{font-size:11px;background:linear-gradient(135deg,#af2eff,#31DDFF);color:#fff;padding:3px 11px;border-radius:20px;font-weight:700;white-space:nowrap;}
+.mybrand-dot{width:10px;height:10px;border-radius:50%;background:#af2eff;box-shadow:0 0 8px #af2eff88;flex-shrink:0;}
+
+/* SIDEBAR */
+.sb{position:fixed;top:0;left:0;height:100%;width:246px;background:var(--sf);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-right:1px solid var(--bd2);z-index:300;transform:translateX(-100%);transition:transform .3s cubic-bezier(.4,0,.2,1);box-shadow:var(--shl);display:flex;flex-direction:column;padding-top:58px;}
+.sb.open{transform:translateX(0);}
+.ov{position:fixed;inset:0;background:rgba(10,5,25,.42);backdrop-filter:blur(3px);z-index:290;display:none;}
+.ov.open{display:block;}
+.sb-hd{padding:14px 17px 11px;border-bottom:1px solid var(--bd);}
+.sb-logo{font-size:13px;font-weight:800;background:linear-gradient(135deg,#af2eff,#31DDFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:.1em;text-transform:uppercase;}
+.sb-sub{font-size:11px;color:var(--tx3);margin-top:2px;}
+.nl{list-style:none;padding:8px 7px;flex:1;overflow-y:auto;}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:var(--tx2);transition:all .15s;margin-bottom:2px;}
+.ni:hover{background:var(--sf2);color:var(--tx);}
+.ni.active{background:linear-gradient(135deg,rgba(175,46,255,.18),rgba(49,221,255,.1));color:#af2eff;border:1px solid var(--bd2);}
+.ni i{font-size:16px;flex-shrink:0;}
+.nbadge{margin-left:auto;font-size:10px;background:linear-gradient(135deg,#af2eff,#31DDFF);color:#fff;padding:1px 7px;border-radius:8px;font-weight:700;}
+
+/* MAIN */
+.main{margin-top:var(--hh);padding:16px 15px 32px;}
+.pg{display:none;animation:fi .2s ease;}
+.pg.active{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* FILTER BAR */
+.fr{display:flex;align-items:center;gap:7px;margin:12px 0;flex-wrap:wrap;}
+.fb{font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--bd2);background:var(--sf);color:var(--tx2);cursor:pointer;font-weight:600;transition:all .15s;}
+.fb:hover{border-color:#af2eff;color:#af2eff;}
+.fb.active{background:linear-gradient(135deg,#af2eff,#8800cc);color:#fff;border-color:transparent;box-shadow:0 2px 10px rgba(175,46,255,.32);}
+
+/* PAGE HEADER */
+.ph{margin-bottom:14px;}
+.ph-t{font-size:20px;font-weight:800;color:var(--tx);}
+.ph-s{font-size:12px;color:var(--tx2);margin-top:3px;}
+
+/* KPI CARDS */
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin-bottom:14px;}
+.kc{background:var(--sf);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--cr);padding:14px 15px;box-shadow:var(--sh);border:1px solid var(--bd2);position:relative;overflow:hidden;}
+.kc::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0;}
+.kc.ca::after{background:linear-gradient(90deg,#af2eff,#d68aff);}
+.kc.cb::after{background:linear-gradient(90deg,#31DDFF,#00af66);}
+.kc.cc::after{background:linear-gradient(90deg,#5BC8A0,#31DDFF);}
+.kc.cd::after{background:linear-gradient(90deg,#ffab33,#ff6314);}
+.kc.ce::after{background:linear-gradient(90deg,#E07090,#cf003d);}
+.kc.cf::after{background:linear-gradient(90deg,#FFD166,#ffab33);}
+.kl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;}
+.kv{font-size:23px;font-weight:800;color:var(--tx);line-height:1;}
+.kch{font-size:11px;margin-top:5px;display:flex;align-items:center;gap:3px;font-weight:600;}
+.up{color:var(--pos);}.dn{color:var(--neg);}
+
+/* CHART CARDS */
+.cc{background:var(--sf);backdrop-filter:var(--gl);-webkit-backdrop-filter:var(--gl);border-radius:var(--cr);padding:15px 17px;box-shadow:var(--sh);border:1px solid var(--bd);margin-bottom:13px;}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:11px;}
+.ct{font-size:13px;font-weight:700;color:var(--tx);}
+.cs{font-size:11px;color:var(--tx3);margin-top:1px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:13px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;}
+@media(max-width:720px){.g2,.g3,.g4{grid-template-columns:1fr;}}
+@media(max-width:900px){.g4{grid-template-columns:1fr 1fr;}}
+
+/* LEGEND */
+.lg{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:8px;}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2);font-weight:600;}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+
+/* SENTIMENT BARS */
+.sb-w{margin:9px 0;}
+.sb-l{display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:4px;font-weight:600;}
+.sb-b{height:9px;border-radius:5px;display:flex;overflow:hidden;}
+.sp{background:var(--pos);}.sn{background:var(--neu);}.sg{background:var(--neg);}
+
+/* SOV BARS */
+.sovl{list-style:none;}
+.sovi{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:12px;}
+.sovdot{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+.sovn{flex:1;color:var(--tx);font-weight:600;}
+.sovbg{flex:2;height:7px;background:var(--sf2);border-radius:4px;overflow:hidden;border:1px solid var(--bd);}
+.sovfill{height:100%;border-radius:4px;}
+.sovpct{font-weight:800;color:var(--tx);min-width:34px;text-align:right;}
+
+/* RING */
+.rw{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.rp{position:relative;flex-shrink:0;}
+.rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;}
+.rcl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;}
+.rcv{font-size:16px;font-weight:800;color:var(--tx);line-height:1.1;}
+
+/* CHANNEL CARDS */
+.chc{background:var(--sf2);border-radius:11px;padding:12px 13px;border:1px solid var(--bd2);text-align:center;}
+.chi{font-size:20px;margin-bottom:5px;}
+.chn{font-size:10px;font-weight:800;color:var(--tx3);text-transform:uppercase;letter-spacing:.07em;}
+.chv{font-size:19px;font-weight:800;color:var(--tx);margin:3px 0 1px;}
+.chs{font-size:10px;color:var(--tx3);}
+
+/* TABLES */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{text-align:left;font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;padding:6px 9px;border-bottom:1px solid var(--bd2);}
+.tbl td{padding:8px 9px;border-bottom:1px solid var(--bd);color:var(--tx);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tier-pill{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap;}
+
+/* VIRAL POSTS */
+.vpc{background:var(--sf2);border-radius:11px;padding:11px 13px;border:1px solid var(--bd2);margin-bottom:9px;display:flex;align-items:center;gap:11px;}
+.vpr{font-size:17px;font-weight:800;color:var(--tx3);min-width:26px;}
+.vpb{flex:1;}
+.vpbrand{font-size:11px;font-weight:800;margin-bottom:2px;}
+.vpmeta{font-size:11px;color:var(--tx2);}
+.vpeng{font-size:15px;font-weight:800;color:var(--tx);text-align:right;white-space:nowrap;}
+.vpenglab{font-size:10px;color:var(--tx3);text-align:right;}
+
+/* TOPIC PILLS */
+.tc{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+.tp{padding:4px 11px;border-radius:20px;font-size:11px;font-weight:700;border:1px solid transparent;}
+.tp.pos{background:rgba(91,200,160,.15);color:#2fa870;border-color:rgba(91,200,160,.3);}
+.tp.neu{background:var(--sf2);color:var(--tx2);border-color:var(--bd);}
+.tp.neg{background:rgba(224,112,144,.13);color:#c04060;border-color:rgba(224,112,144,.28);}
+
+/* IMPACT BARS */
+.ib{height:7px;background:var(--sf2);border-radius:4px;overflow:hidden;border:1px solid var(--bd);}
+.ibf{height:100%;border-radius:4px;background:linear-gradient(90deg,#af2eff,#31DDFF);}
+
+/* INSIGHT BOX */
+.ins{background:linear-gradient(135deg,rgba(175,46,255,.09),rgba(49,221,255,.06));border:1px solid var(--bd2);border-radius:11px;padding:11px 14px;margin-bottom:13px;font-size:12px;color:var(--tx2);line-height:1.6;}
+.ins strong{color:#af2eff;}
+
+/* GLOSSARY */
+.gll{display:flex;flex-direction:column;gap:9px;}
+.gli{background:var(--sf);backdrop-filter:var(--gl);border:1px solid var(--bd2);border-radius:11px;padding:13px 15px;}
+.glt{font-size:13px;font-weight:800;background:linear-gradient(135deg,#af2eff,#31DDFF);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px;}
+.gld{font-size:12px;color:var(--tx2);line-height:1.6;}
+code{background:var(--sf2);padding:1px 5px;border-radius:4px;font-size:11px;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px;}
+</style>
+</head>
+<body data-theme="light">
+
+<div class="ov" id="ov" onclick="closeSB()"></div>
+<div class="sb" id="sb">
+  <div class="sb-hd">
+    <div class="sb-logo">SML Studio</div>
+    <div class="sb-sub" id="sb-period">Enerwave · Social Listening · Apr 2026</div>
+  </div>
+  <ul class="nl">
+    <li class="ni active" onclick="go(0)"><i class="ti ti-layout-dashboard"></i>Summary <span class="nbadge">APR</span></li>
+    <li class="ni" onclick="go(1)"><i class="ti ti-chart-pie"></i>Share of Voice</li>
+    <li class="ni" onclick="go(2)"><i class="ti ti-coin"></i>Earned Media Value</li>
+    <li class="ni" onclick="go(3)"><i class="ti ti-mood-smile"></i>Sentiment & Emotions</li>
+    <li class="ni" onclick="go(4)"><i class="ti ti-tags"></i>Topics & Tags</li>
+    <li class="ni" onclick="go(5)"><i class="ti ti-antenna"></i>Channels & BMU</li>
+    <li class="ni" onclick="go(6)"><i class="ti ti-star"></i>Influencers & Viral</li>
+    <li class="ni" onclick="go(7)"><i class="ti ti-book"></i>Glossary</li>
+  </ul>
+</div>
+
+<div class="hdr">
+  <button class="hbtn" onclick="toggleSB()"><i class="ti ti-menu-2"></i></button>
+  <div class="mybrand-dot"></div>
+  <div class="htitle" id="htitle">Summary — Buzz & KPIs</div>
+  <span class="pbadge" id="hperiod">April 2026</span>
+  <span style="font-size:11px;color:var(--tx3)">vs Mar</span>
+  <button class="hbtn" onclick="toggleDark()" id="dbtn"><i class="ti ti-moon"></i></button>
+</div>
+
+<div class="main">
+
+<!-- PAGE 0: SUMMARY -->
+<div class="pg active" id="p0">
+  <div class="ph"><div class="ph-t" id="p0-title">Buzz & First Look KPIs</div><div class="ph-s" id="p0-sub">April 2026 · Enerwave vs 7 Competitors · All Channels</div></div>
+  <div class="fr" id="fr0">
+    <button class="fb active">All Brands</button>
+    <button class="fb">Enerwave</button>
+    <button class="fb">ΔΕΗ</button>
+    <button class="fb">Protergia</button>
+    <button class="fb">Φ.Α.Ε.Ε.</button>
+    <button class="fb">HERON</button>
+    <button class="fb">Volton</button>
+    <button class="fb">NRG</button>
+    <button class="fb">ΖeniΘ</button>
+  </div>
+  <div class="ins">⚡ <strong>Enerwave</strong> recorded <strong id="s0-buzz">397 mentions</strong> this month — <strong id="s0-sov">14.0% SOV</strong> (+0.4pp vs Mar). EMV up <strong>+28.2%</strong>. Sentiment leads sector at 56% positive. ΔΕΗ dominates volume but Enerwave leads in Impact Score quality.</div>
+  <div class="kg">
+    <div class="kc ca"><div class="kl">Sector Buzz</div><div class="kv" id="k-totalb">2,827</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+19.8% vs Mar</div></div>
+    <div class="kc cb"><div class="kl">Enerwave Buzz</div><div class="kv" id="k-mybuzz">397</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+24.1% vs Mar</div></div>
+    <div class="kc cc"><div class="kl">Enerwave SOV</div><div class="kv" id="k-sov">14.0%</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+0.4pp vs Mar</div></div>
+    <div class="kc cd"><div class="kl">Enerwave EMV</div><div class="kv" id="k-emv">€98.4K</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+28.2% vs Mar</div></div>
+    <div class="kc ce"><div class="kl">Enerwave Eng.</div><div class="kv">4.2M</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+31.4% vs Mar</div></div>
+    <div class="kc cf"><div class="kl">Impact Score</div><div class="kv" id="k-impact">0.412</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>#1 in sector</div></div>
+  </div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Daily Buzz — Enerwave</div><div class="cs">April 2026 · unique mentions/day</div></div></div><div style="position:relative;height:185px"><canvas id="c_daily"></canvas></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">6-Month Buzz Trend</div><div class="cs">Nov 2025 → Apr 2026 · all brands</div></div></div><div class="lg" id="lg_trend"></div><div style="position:relative;height:155px"><canvas id="c_trend"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Impact Score by Brand</div><div class="cs">Avg quality score (0–1) · Apr 2026</div></div></div><div id="impact_bars" style="margin-top:8px"></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">QoQ Buzz Comparison</div><div class="cs">Q1 2026 vs Q2 2026 (Apr partial)</div></div></div><div class="lg"><span class="li"><span class="ld" style="background:#af2eff"></span>Q1 2026</span><span class="li"><span class="ld" style="background:rgba(175,46,255,.35)"></span>Q2 2026</span></div><div style="position:relative;height:155px"><canvas id="c_qoq"></canvas></div></div>
+  </div>
+</div>
+
+<!-- PAGE 1: SOV -->
+<div class="pg" id="p1">
+  <div class="ph"><div class="ph-t">Share of Voice</div><div class="ph-s">Brand visibility · all channels · April 2026</div></div>
+  <div class="fr" id="fr1"><button class="fb active">Apr 2026</button><button class="fb">Mar 2026</button><button class="fb">Q1 2026</button><button class="fb">6M Trend</button></div>
+  <div class="ins">📢 <strong>ΔΕΗ</strong> leads with 28.7% SOV. <strong>Enerwave</strong> holds 14.0% — <strong>#2 among independents</strong>, +0.4pp vs Mar. Protergia (12.1%) and Φ.Α.Ε.Ε. (10.9%) follow closely.</div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">SOV Distribution — Apr 2026</div><div class="cs">% of total sector mentions</div></div></div>
+      <div class="rw">
+        <div class="rp"><canvas id="c_sovring" width="175" height="175"></canvas><div class="rc"><div class="rcl">Enerwave</div><div class="rcv">14.0%</div></div></div>
+        <ul class="sovl" id="sov_bars" style="flex:1"></ul>
+      </div>
+    </div>
+    <div class="cc"><div class="ch"><div><div class="ct">SOV Apr vs Mar 2026</div><div class="cs">Month-over-month comparison</div></div></div><div style="position:relative;height:230px"><canvas id="c_sovcomp"></canvas></div></div>
+  </div>
+  <div class="cc"><div class="ch"><div><div class="ct">SOV 6-Month Evolution</div><div class="cs">Nov 2025 → Apr 2026</div></div></div><div class="lg" id="lg_sovevo"></div><div style="position:relative;height:200px"><canvas id="c_sovevo"></canvas></div></div>
+</div>
+
+<!-- PAGE 2: EMV -->
+<div class="pg" id="p2">
+  <div class="ph"><div class="ph-t">Earned Media Value</div><div class="ph-s">Estimated monetary value of organic coverage · April 2026</div></div>
+  <div class="kg">
+    <div class="kc ca"><div class="kl">Enerwave EMV</div><div class="kv">€98.4K</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+28.2% vs Mar</div></div>
+    <div class="kc cd"><div class="kl">ΔΕΗ EMV</div><div class="kv">€228K</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+28.2% vs Mar</div></div>
+    <div class="kc cb"><div class="kl">Protergia EMV</div><div class="kv">€87.5K</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+24.8% vs Mar</div></div>
+    <div class="kc ce"><div class="kl">Sector EMV</div><div class="kv">€738K</div><div class="kch up"><i class="ti ti-trending-up" style="font-size:12px"></i>+26.1% vs Mar</div></div>
+  </div>
+  <div class="ins">💰 <strong>Enerwave</strong> EMV €98.4K — <strong>13.3% of sector EMV</strong>. Best EMV/Buzz ratio among independents at €248/mention vs sector avg €261. Instagram & News drive 56% of total EMV.</div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">EMV by Brand</div><div class="cs">Apr vs Mar 2026 · thousands EUR</div></div></div><div style="position:relative;height:215px"><canvas id="c_emvbar"></canvas></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">Enerwave EMV by Channel</div><div class="cs">Source breakdown · Apr 2026</div></div></div>
+      <div class="rw" style="justify-content:center">
+        <div class="rp"><canvas id="c_emvring" width="165" height="165"></canvas><div class="rc"><div class="rcl">Total EMV</div><div class="rcv">€98.4K</div></div></div>
+        <div class="lg" style="flex-direction:column;gap:8px">
+          <span class="li"><span class="ld" style="background:#af2eff"></span>News 30%</span>
+          <span class="li"><span class="ld" style="background:#e1306c"></span>Instagram 26%</span>
+          <span class="li"><span class="ld" style="background:#1877f2"></span>Facebook 15%</span>
+          <span class="li"><span class="ld" style="background:#6B7280"></span>Blogs 13%</span>
+          <span class="li"><span class="ld" style="background:#1da1f2"></span>Twitter 9%</span>
+          <span class="li"><span class="ld" style="background:#FFD166"></span>Other 7%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="cc"><div class="ch"><div><div class="ct">EMV Detail Table · All Brands</div><div class="cs">April 2026 · EUR</div></div></div>
+    <div style="overflow-x:auto"><table class="tbl" id="emv_table"></table></div>
+  </div>
+</div>
+
+<!-- PAGE 3: SENTIMENT & EMOTIONS -->
+<div class="pg" id="p3">
+  <div class="ph"><div class="ph-t">Sentiment & Emotions</div><div class="ph-s">Tone analysis · emotion breakdown · April 2026</div></div>
+  <div class="ins">😊 <strong>Enerwave</strong> leads sector on positive sentiment at <strong>56.0%</strong> vs sector avg 45.9%. Anger concentrated on Bills & Payments topics. Fear lowest among all brands.</div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Sentiment — All Brands</div><div class="cs">Positive / Neutral / Negative · Apr 2026</div></div></div><div id="sent_bars" style="margin-top:6px"></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">Emotion Distribution — Enerwave</div><div class="cs">5 emotion categories · Apr 2026</div></div></div><div style="position:relative;height:200px"><canvas id="c_emo"></canvas></div></div>
+  </div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Sentiment Trend — Enerwave</div><div class="cs">6-month evolution</div></div></div><div class="lg"><span class="li"><span class="ld" style="background:var(--pos)"></span>Positive</span><span class="li"><span class="ld" style="background:var(--neu)"></span>Neutral</span><span class="li"><span class="ld" style="background:var(--neg)"></span>Negative</span></div><div style="position:relative;height:175px"><canvas id="c_senttrend"></canvas></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">Sentiment Ring — Enerwave</div><div class="cs">Apr 2026 · tone distribution</div></div></div>
+      <div class="rw" style="justify-content:center">
+        <div class="rp"><canvas id="c_sentring" width="150" height="150"></canvas><div class="rc"><div class="rcl">Positive</div><div class="rcv">56.0%</div></div></div>
+        <div class="lg" style="flex-direction:column;gap:9px"><span class="li"><span class="ld" style="background:var(--pos)"></span>Positive 56.0%</span><span class="li"><span class="ld" style="background:var(--neu)"></span>Neutral 27.0%</span><span class="li"><span class="ld" style="background:var(--neg)"></span>Negative 17.0%</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 4: TOPICS -->
+<div class="pg" id="p4">
+  <div class="ph"><div class="ph-t">Topics & Tags</div><div class="ph-s">Discussed themes · sentiment per topic · April 2026</div></div>
+  <div class="ins">🏷️ <strong>Corporate</strong> & <strong>Energy Market</strong> drive the most positive buzz. <strong>Bills & Payments</strong> has the highest negative ratio (49%) — key reputation risk area. Pricing trending negative this month.</div>
+  <div class="cc"><div class="ch"><div><div class="ct">Topic Sentiment Matrix</div><div class="cs">Positive / Neutral / Negative per tag · all brands</div></div></div><div style="position:relative;height:250px"><canvas id="c_topicmat"></canvas></div></div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Topic Buzz Ranking</div><div class="cs">Total mentions per tag</div></div></div><div style="position:relative;height:215px"><canvas id="c_topicbuzz"></canvas></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">Hot Topics — Enerwave</div><div class="cs">By dominant sentiment · Apr 2026</div></div></div>
+      <div class="tc">
+        <span class="tp pos">⚡ E-mobility</span><span class="tp pos">🌿 Renewables</span>
+        <span class="tp pos">📈 Energy Policy</span><span class="tp pos">🏢 Corporate</span>
+        <span class="tp pos">♻️ Sustainability</span><span class="tp neu">🔋 Smart Meters</span>
+        <span class="tp neu">🏪 B2B Services</span><span class="tp neu">🚗 EV Charging</span>
+        <span class="tp neg">💸 Bills & Pmts</span><span class="tp neg">🏷️ Pricing</span>
+        <span class="tp neg">📞 Customer Svc</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 5: CHANNELS & BMU -->
+<div class="pg" id="p5">
+  <div class="ph"><div class="ph-t">Channels & BMU Analysis</div><div class="ph-s">13 channels · Brand/Media/UGC/Influencer mix · April 2026</div></div>
+  <div class="ins">📡 <strong>News</strong> leads at 598 mentions (21.1%). <strong>Instagram</strong> #1 social channel at 362. TikTok growing fastest (+34% vs Mar). Media dominates BMU at 44% — strong earned media performance for Enerwave.</div>
+  <div class="g4" id="ch_cards" style="margin-bottom:13px"></div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Buzz by Channel</div><div class="cs">All 13 channels · Apr 2026</div></div></div><div style="position:relative;height:235px"><canvas id="c_chbuzz"></canvas></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">BMU Category Mix</div><div class="cs">Brand / Media / UGC / Influencer tiers</div></div></div>
+      <div class="rw" style="justify-content:center">
+        <div class="rp"><canvas id="c_bmuring" width="165" height="165"></canvas><div class="rc"><div class="rcl">Media</div><div class="rcv">44.0%</div></div></div>
+        <div id="bmu_legend" class="lg" style="flex-direction:column;gap:7px;font-size:11px"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 6: INFLUENCERS & VIRAL -->
+<div class="pg" id="p6">
+  <div class="ph"><div class="ph-t">Influencers & Viral Posts</div><div class="ph-s">Tier performance · top 10 mentions by engagement · April 2026</div></div>
+  <div class="ins">⭐ <strong>Nano-influencers</strong> drive volume (257 mentions). <strong>Mid-tier</strong> leads on engagement efficiency (32,115 avg/post). <strong>Macro</strong> delivers best reach per post. Recommend increasing Mid-tier activations for Enerwave in May.</div>
+  <div class="g2">
+    <div class="cc"><div class="ch"><div><div class="ct">Influencer Tier — Buzz & EMV</div><div class="cs">Volume vs value</div></div></div><div class="lg"><span class="li"><span class="ld" style="background:#af2eff"></span>Buzz</span><span class="li"><span class="ld" style="background:#31DDFF"></span>EMV (K€)</span></div><div style="position:relative;height:200px"><canvas id="c_infbar"></canvas></div></div>
+    <div class="cc"><div class="ch"><div><div class="ct">Avg Engagement per Post by Tier</div><div class="cs">Efficiency metric · Apr 2026</div></div></div><div style="position:relative;height:200px"><canvas id="c_infeff"></canvas></div></div>
+  </div>
+  <div class="cc"><div class="ch"><div><div class="ct">Influencer Tier Detail</div><div class="cs">All tiers · Apr 2026</div></div></div>
+    <div style="overflow-x:auto"><table class="tbl" id="inf_table"></table></div>
+  </div>
+  <div class="cc" style="margin-top:0"><div class="ch"><div><div class="ct">Top 10 Viral Mentions</div><div class="cs">Ranked by total engagement · Apr 2026</div></div></div><div id="vp_list"></div></div>
+</div>
+
+<!-- PAGE 7: GLOSSARY -->
+<div class="pg" id="p7">
+  <div class="ph"><div class="ph-t">Glossary</div><div class="ph-s">Metric definitions + Power BI integration guide</div></div>
+  <div class="gll">
+    <div class="gli"><div class="glt">Buzz / Distinct Mentions</div><div class="gld">COUNT DISTINCT of <code>table[id]</code> — each unique content piece = 1 Buzz unit. Engagement type rows (Likes/Shares etc.) share the same <code>id</code>, so de-duplication is essential before counting.</div></div>
+    <div class="gli"><div class="glt">Share of Voice (SOV)</div><div class="gld">Brand Buzz ÷ Total Sector Buzz × 100. DAX: <code>DIVIDE(CALCULATE([Buzz],Queries[query_name]="Enerwave"),[Total Buzz])*100</code></div></div>
+    <div class="gli"><div class="glt">Earned Media Value (EMV)</div><div class="gld">SUM of <code>table[emv]</code> after de-duplicating by <code>id</code>. Represents the estimated cost of equivalent paid media placement.</div></div>
+    <div class="gli"><div class="glt">Impact Score</div><div class="gld">AVG of <code>table[impact]</code> — proprietary score (0–1) per mention reflecting source authority and reach potential. DAX: <code>AVERAGEX(DISTINCT(table[id]),RELATED(table[impact]))</code></div></div>
+    <div class="gli"><div class="glt">BMU Category</div><div class="gld">Dimension <code>BMUI[bmu_category]</code>: Brand · Media · UGC · Nano-influencers (&lt;10K) · Micro (10K–100K) · Mid-tier (100K–500K) · Macro (500K–1M) · Mega (&gt;1M followers).</div></div>
+    <div class="gli"><div class="glt">Emotion Detection</div><div class="gld">Dimension <code>Emotions[emotion]</code>: Happiness · Anger · Sadness · Fear · Neutral. Deeper NLP layer complementing Sentiment — identifies the <em>why</em> behind tone.</div></div>
+    <div class="gli"><div class="glt">Power BI Integration</div><div class="gld">Replace <code>window.SML_DATA</code> at the top of this file with a DAX measure generating a JSON string from your live aggregates. The HTML Content visual passes the measure value to this variable, making all charts live. Dimensions: Calendar · Queries · Channels · Sentiment · Emotions · BMUI · BMUI_Influencers · TopicSlicer.</div></div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ===================== BOOT FROM SML_DATA =====================
+const D = window.SML_DATA;
+const brands = D.brands;
+const bc = D.bcolors;
+const mb = D.mybrand;
+
+// ===================== NAV =====================
+const pages=document.querySelectorAll('.pg');
+const nis=document.querySelectorAll('.ni');
+const titles=['Summary — Buzz & KPIs','Share of Voice','Earned Media Value','Sentiment & Emotions','Topics & Tags','Channels & BMU','Influencers & Viral','Glossary'];
+let inited={};
+
+function go(i){
+  pages.forEach(p=>p.classList.remove('active'));
+  nis.forEach(n=>n.classList.remove('active'));
+  pages[i].classList.add('active');
+  nis[i].classList.add('active');
+  document.getElementById('htitle').textContent=titles[i];
+  closeSB();
+  setTimeout(()=>init(i),55);
+}
+function toggleSB(){document.getElementById('sb').classList.toggle('open');document.getElementById('ov').classList.toggle('open');}
+function closeSB(){document.getElementById('sb').classList.remove('open');document.getElementById('ov').classList.remove('open');}
+function toggleDark(){
+  const b=document.body,d=b.dataset.theme==='dark';
+  b.dataset.theme=d?'light':'dark';
+  document.getElementById('dbtn').innerHTML=d?'<i class="ti ti-moon"></i>':'<i class="ti ti-sun"></i>';
+  redrawRings();
+}
+document.querySelectorAll('[id^="fr"]').forEach(row=>{
+  row.querySelectorAll('.fb').forEach(btn=>{
+    btn.addEventListener('click',function(){row.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));this.classList.add('active');});
+  });
+});
+
+// ===================== CHART HELPERS =====================
+const dk=()=>document.body.dataset.theme==='dark';
+const gc=()=>dk()?'rgba(175,46,255,0.08)':'rgba(123,95,191,0.07)';
+const tc=()=>dk()?'#8060a8':'#a89fd4';
+const base=()=>({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}}}});
+
+// ===================== RING DRAW =====================
+const rings={};
+function defR(id,segs,cl,cv){rings[id]={segs,cl,cv};}
+function drawR(id){
+  const c=document.getElementById(id);if(!c)return;
+  const ctx=c.getContext('2d'),W=c.width,H=c.height,cx=W/2,cy=H/2,outerR=Math.min(W,H)/2-8,lw=11;
+  const dark=dk();
+  ctx.clearRect(0,0,W,H);
+  ctx.beginPath();ctx.arc(cx,cy,outerR-lw/2,0,Math.PI*2);
+  ctx.strokeStyle=dark?'rgba(255,255,255,0.05)':'rgba(175,46,255,0.07)';
+  ctx.lineWidth=lw;ctx.stroke();
+  const segs=rings[id].segs,total=segs.reduce((s,sg)=>s+sg.v,0);
+  let a=-Math.PI/2,gap=0.04;
+  segs.forEach(sg=>{
+    const sw=(sg.v/total)*(Math.PI*2)-gap,ea=a+sw;
+    ctx.save();
+    if(dark){ctx.shadowColor=sg.c;ctx.shadowBlur=18;}
+    ctx.beginPath();ctx.arc(cx,cy,outerR-lw/2,a,ea);
+    ctx.strokeStyle=sg.c;ctx.lineWidth=lw;ctx.lineCap='round';ctx.stroke();
+    ctx.restore();
+    a=ea+gap;
+  });
+}
+function redrawRings(){Object.keys(rings).forEach(id=>drawR(id));}
+
+// Define rings from data
+defR('c_sovring', brands.map(b=>({v:D.sov_curr[b],c:bc[b]})));
+defR('c_emvring', [{v:30,c:'#af2eff'},{v:26,c:'#e1306c'},{v:15,c:'#1877f2'},{v:13,c:'#6B7280'},{v:9,c:'#1da1f2'},{v:7,c:'#FFD166'}]);
+defR('c_sentring', [{v:56,c:'#5BC8A0'},{v:27,c:'#A89FD4'},{v:17,c:'#E07090'}]);
+defR('c_bmuring', Object.entries(D.bmu_buzz).map(([k,v])=>({v,c:D.bmu_colors[k]||'#888'})));
+
+// ===================== BUILD DYNAMIC HTML =====================
+function buildLegend(elId, items){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML=items.map(([label,color])=>`<span class="li"><span class="ld" style="background:${color}"></span>${label}</span>`).join('');
+}
+function buildImpactBars(){
+  const el=document.getElementById('impact_bars');if(!el)return;
+  const sorted=brands.slice().sort((a,b)=>D.impact[b]-D.impact[a]);
+  el.innerHTML=sorted.map((b,i)=>`
+    <div style="margin-bottom:9px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:${b===mb?'800':'600'};margin-bottom:3px;color:${b===mb?bc[mb]:'var(--tx2)'}">
+        <span>${b}${b===mb?' ★':''}</span><span>${D.impact[b]}</span>
+      </div>
+      <div class="ib"><div class="ibf" style="width:${D.impact[b]*100}%;background:linear-gradient(90deg,${bc[b]},${bc[b]}aa)"></div></div>
+    </div>`).join('');
+}
+function buildSOVBars(){
+  const el=document.getElementById('sov_bars');if(!el)return;
+  const sorted=brands.slice().sort((a,b)=>D.sov_curr[b]-D.sov_curr[a]);
+  el.innerHTML=sorted.map(b=>`
+    <li class="sovi">
+      <span class="sovdot" style="background:${bc[b]}"></span>
+      <span class="sovn">${b}${b===mb?' ★':''}</span>
+      <div class="sovbg"><div class="sovfill" style="width:${D.sov_curr[b]/35*100}%;background:${bc[b]}"></div></div>
+      <span class="sovpct">${D.sov_curr[b]}%</span>
+    </li>`).join('');
+}
+function buildSentBars(){
+  const el=document.getElementById('sent_bars');if(!el)return;
+  const sorted=[mb,...brands.filter(b=>b!==mb)];
+  el.innerHTML=sorted.map(b=>`
+    <div class="sb-w">
+      <div class="sb-l"><span style="font-weight:${b===mb?800:600};color:${b===mb?bc[mb]:'var(--tx)'}">${b}${b===mb?' ★':''}</span><span>Pos ${D.sentiment[b].Positive}% · Neu ${D.sentiment[b].Neutral}% · Neg ${D.sentiment[b].Negative}%</span></div>
+      <div class="sb-b"><div class="sp" style="width:${D.sentiment[b].Positive}%"></div><div class="sn" style="width:${D.sentiment[b].Neutral}%"></div><div class="sg" style="width:${D.sentiment[b].Negative}%"></div></div>
+    </div>`).join('');
+}
+function buildChannelCards(){
+  const el=document.getElementById('ch_cards');if(!el)return;
+  const icons={'News':'ti-news','Instagram':'ti-brand-instagram','Facebook':'ti-brand-facebook','Twitter/X':'ti-brand-twitter','Forums':'ti-messages','Blogs':'ti-writing','TikTok':'ti-brand-tiktok','LinkedIn':'ti-brand-linkedin'};
+  const top8=Object.entries(D.ch_buzz).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  el.innerHTML=top8.map(([ch,v])=>`
+    <div class="chc">
+      <div class="chi" style="color:${D.ch_colors[ch]||'#888'}"><i class="ti ${icons[ch]||'ti-antenna'}"></i></div>
+      <div class="chn">${ch}</div><div class="chv">${v}</div>
+      <div class="chs">${(v/D.total_curr*100).toFixed(1)}% buzz</div>
+    </div>`).join('');
+}
+function buildBMULegend(){
+  const el=document.getElementById('bmu_legend');if(!el)return;
+  const total=Object.values(D.bmu_buzz).reduce((a,b)=>a+b,0);
+  el.innerHTML=Object.entries(D.bmu_buzz).map(([k,v])=>`
+    <span class="li"><span class="ld" style="background:${D.bmu_colors[k]||'#888'}"></span>${k} ${(v/total*100).toFixed(1)}%</span>`).join('');
+}
+function buildEMVTable(){
+  const el=document.getElementById('emv_table');if(!el)return;
+  el.innerHTML=`<thead><tr><th>Brand</th><th>News</th><th>Instagram</th><th>Facebook</th><th>Blogs</th><th>Twitter</th><th>Other</th><th>Total</th><th>vs Mar</th></tr></thead>
+  <tbody>${brands.map(b=>{
+    const t=D.emv_curr[b],tp=D.emv_prev[b],chg=((t-tp)/tp*100).toFixed(1);
+    const n=Math.round(t*.30),ig=Math.round(t*.26),fb=Math.round(t*.15),bl=Math.round(t*.13),tw=Math.round(t*.09),ot=t-n-ig-fb-bl-tw;
+    return`<tr><td><strong style="color:${bc[b]}">${b}${b===mb?' ★':''}</strong></td><td>€${(n/1000).toFixed(0)}K</td><td>€${(ig/1000).toFixed(0)}K</td><td>€${(fb/1000).toFixed(0)}K</td><td>€${(bl/1000).toFixed(0)}K</td><td>€${(tw/1000).toFixed(0)}K</td><td>€${(ot/1000).toFixed(0)}K</td><td><strong>€${(t/1000).toFixed(0)}K</strong></td><td style="color:${chg>0?'#5BC8A0':'#E07090'};font-weight:700">${chg>0?'+':''}${chg}%</td></tr>`;
+  }).join('')}</tbody>`;
+}
+function buildInfTable(){
+  const el=document.getElementById('inf_table');if(!el)return;
+  const tcolors={'Nano':'rgba(0,175,102,.2)','Micro':'rgba(49,221,255,.2)','Mid-tier':'rgba(175,46,255,.2)','Macro':'rgba(212,160,200,.2)','Mega':'rgba(207,0,61,.15)'};
+  const tcols={'Nano':'#00af66','Micro':'#00b8cc','Mid-tier':'#af2eff','Macro':'#a040a0','Mega':'#cf003d'};
+  el.innerHTML=`<thead><tr><th>Tier</th><th>Buzz</th><th>Total Engagement</th><th>Avg Eng/Post</th><th>Total EMV</th><th>EMV/Post</th></tr></thead>
+  <tbody>${D.inf_data.map(r=>`<tr>
+    <td><span class="tier-pill" style="background:${tcolors[r.tier]||'#eee'};color:${tcols[r.tier]||'#333'}">${r.tier}</span></td>
+    <td>${r.buzz}</td><td>${(r.engagement/1000000).toFixed(2)}M</td>
+    <td>${r.eff.toLocaleString()}</td>
+    <td>€${(r.emv/1000).toFixed(0)}K</td>
+    <td>€${Math.round(r.emv/r.buzz).toLocaleString()}</td>
+  </tr>`).join('')}</tbody>`;
+}
+function buildVP(){
+  const el=document.getElementById('vp_list');if(!el)return;
+  const sc={Positive:'color:var(--pos)',Neutral:'color:var(--neu)',Negative:'color:var(--neg)'};
+  el.innerHTML=D.top_posts.map(p=>`
+    <div class="vpc">
+      <div class="vpr">#${p.rank}</div>
+      <div style="width:7px;height:34px;border-radius:3px;background:${bc[p.brand]||'#888'};flex-shrink:0;${dk()?`box-shadow:0 0 8px ${bc[p.brand]}88`:''}"></div>
+      <div class="vpb">
+        <div class="vpbrand" style="color:${bc[p.brand]||'var(--ac)'}">${p.brand}</div>
+        <div class="vpmeta"><i class="ti ti-device-mobile" style="font-size:11px"></i> ${p.channel} · <span style="${sc[p.sentiment]}">${p.sentiment}</span> · ${p.tag}</div>
+      </div>
+      <div><div class="vpeng">${p.eng.toLocaleString()}</div><div class="vpenglab">engagements</div><div style="font-size:10px;color:var(--tx3);text-align:right">EMV ${p.emv}</div></div>
+    </div>`).join('');
+}
+
+// ===================== INIT CHARTS =====================
+function init(i){
+  if(inited[i])return;
+  inited[i]=true;
+
+  if(i===0){
+    buildImpactBars();
+    buildLegend('lg_trend', brands.map(b=>[b,bc[b]]));
+    new Chart(document.getElementById('c_daily'),{type:'bar',data:{labels:Object.keys(D.daily),datasets:[{data:Object.values(D.daily),backgroundColor:bc[mb]+'aa',hoverBackgroundColor:bc[mb],borderRadius:4,borderSkipped:false}]},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:9},maxTicksLimit:10}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}}}}});
+    new Chart(document.getElementById('c_trend'),{type:'line',data:{labels:D.months,datasets:brands.map((b,i)=>({label:b,data:D.monthly[b],borderColor:bc[b],backgroundColor:b===mb?bc[mb]+'18':'transparent',fill:b===mb,tension:0.42,pointRadius:3,pointBackgroundColor:bc[b],borderWidth:b===mb?2.5:1.5,borderDash:b===mb?[]:[4,3]}))},options:base()});
+    new Chart(document.getElementById('c_qoq'),{type:'bar',data:{labels:brands,datasets:[{label:'Q1',data:brands.map(b=>D.monthly[b].slice(0,3).reduce((a,c)=>a+c,0)),backgroundColor:brands.map(b=>bc[b]+'cc'),borderRadius:5,borderSkipped:false},{label:'Q2',data:brands.map(b=>D.monthly[b][5]),backgroundColor:brands.map(b=>bc[b]+'55'),borderRadius:5,borderSkipped:false}]},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:9}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}}}}});
+  }
+
+  if(i===1){
+    buildSOVBars();
+    buildLegend('lg_sovevo', brands.map(b=>[b,bc[b]]));
+    drawR('c_sovring');
+    new Chart(document.getElementById('c_sovcomp'),{type:'bar',data:{labels:brands,datasets:[{label:'Apr',data:brands.map(b=>D.sov_curr[b]),backgroundColor:brands.map(b=>bc[b]),borderRadius:5,borderSkipped:false},{label:'Mar',data:brands.map(b=>D.sov_prev[b]),backgroundColor:brands.map(b=>bc[b]+'55'),borderRadius:5,borderSkipped:false}]},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:9}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>v+'%'}}}}});
+    new Chart(document.getElementById('c_sovevo'),{type:'line',data:{labels:D.months,datasets:brands.map(b=>({label:b,data:D.sov_evo[b],borderColor:bc[b],backgroundColor:bc[b]+(b===mb?'22':'11'),fill:true,tension:0.4,pointRadius:3,borderWidth:b===mb?2.5:1.5}))},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>v+'%'},min:0,max:35}}}});
+  }
+
+  if(i===2){
+    drawR('c_emvring');
+    buildEMVTable();
+    new Chart(document.getElementById('c_emvbar'),{type:'bar',data:{labels:brands,datasets:[{label:'Apr',data:brands.map(b=>Math.round(D.emv_curr[b]/1000)),backgroundColor:brands.map(b=>bc[b]),borderRadius:5,borderSkipped:false},{label:'Mar',data:brands.map(b=>Math.round(D.emv_prev[b]/1000)),backgroundColor:brands.map(b=>bc[b]+'55'),borderRadius:5,borderSkipped:false}]},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:9}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>'€'+v+'K'}}}}});
+  }
+
+  if(i===3){
+    buildSentBars();
+    drawR('c_sentring');
+    const ekeys=Object.keys(D.emo_curr),evals=Object.values(D.emo_curr);
+    new Chart(document.getElementById('c_emo'),{type:'bar',data:{labels:ekeys,datasets:[{data:evals,backgroundColor:ekeys.map(k=>D.emo_colors[k]),borderRadius:6,borderSkipped:false}]},options:{...base(),indexAxis:'y',scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{display:false},ticks:{color:tc(),font:{size:11}}}}}});
+    new Chart(document.getElementById('c_senttrend'),{type:'line',data:{labels:D.months,datasets:[{data:[53,54,55,54,54,56],borderColor:'#5BC8A0',backgroundColor:'rgba(91,200,160,0.1)',fill:true,tension:0.4,pointRadius:3},{data:[30,29,28,28,28,27],borderColor:'#A89FD4',backgroundColor:'transparent',tension:0.4,borderDash:[4,3],pointRadius:3},{data:[17,17,17,18,18,17],borderColor:'#E07090',backgroundColor:'transparent',tension:0.4,borderDash:[2,4],pointRadius:3}]},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10},callback:v=>v+'%'},min:0,max:80}}}});
+  }
+
+  if(i===4){
+    const tags=D.tags;
+    new Chart(document.getElementById('c_topicmat'),{type:'bar',data:{labels:tags,datasets:[{label:'Positive',data:tags.map(t=>D.tag_data[t].Positive),backgroundColor:'rgba(91,200,160,0.75)',borderRadius:4,borderSkipped:false},{label:'Neutral',data:tags.map(t=>D.tag_data[t].Neutral),backgroundColor:'rgba(168,159,212,0.6)',borderRadius:4,borderSkipped:false},{label:'Negative',data:tags.map(t=>D.tag_data[t].Negative),backgroundColor:'rgba(224,112,144,0.7)',borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:tc(),font:{size:11},boxWidth:10}}},scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:9}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}}}}});
+    new Chart(document.getElementById('c_topicbuzz'),{type:'bar',data:{labels:tags,datasets:[{data:tags.map(t=>D.tag_data[t].Positive+D.tag_data[t].Neutral+D.tag_data[t].Negative),backgroundColor:tags.map((_,i)=>[bc[mb],'#31DDFF','#ffab33','#00af66','#cf003d','#fa4616','#0077C8','#243a78'][i%8]),borderRadius:5,borderSkipped:false}]},options:{...base(),indexAxis:'y',scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{display:false},ticks:{color:tc(),font:{size:9}}}}}});
+  }
+
+  if(i===5){
+    buildChannelCards();
+    buildBMULegend();
+    drawR('c_bmuring');
+    const chLabels=Object.keys(D.ch_buzz),chVals=Object.values(D.ch_buzz);
+    new Chart(document.getElementById('c_chbuzz'),{type:'bar',data:{labels:chLabels,datasets:[{data:chVals,backgroundColor:chLabels.map(c=>D.ch_colors[c]||'#888'),borderRadius:5,borderSkipped:false}]},options:{...base(),indexAxis:'y',scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{display:false},ticks:{color:tc(),font:{size:10}}}}}});
+  }
+
+  if(i===6){
+    buildInfTable();
+    buildVP();
+    const tiers=D.inf_data.map(r=>r.tier);
+    const tierColors=['#00af66','#31DDFF','#af2eff','#D4A0C8','#cf003d'];
+    new Chart(document.getElementById('c_infbar'),{type:'bar',data:{labels:tiers,datasets:[{label:'Buzz',data:D.inf_data.map(r=>r.buzz),backgroundColor:tierColors.map(c=>c+'cc'),borderRadius:5,borderSkipped:false,yAxisID:'y'},{label:'EMV K€',data:D.inf_data.map(r=>Math.round(r.emv/1000)),backgroundColor:tierColors.map(c=>c+'55'),borderRadius:5,borderSkipped:false,yAxisID:'y1'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,labels:{color:tc(),font:{size:11},boxWidth:10}}},scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}},position:'left'},y1:{grid:{display:false},ticks:{color:tc(),font:{size:10}},position:'right'}}}});
+    new Chart(document.getElementById('c_infeff'),{type:'bar',data:{labels:tiers,datasets:[{data:D.inf_data.map(r=>r.eff),backgroundColor:tierColors,borderRadius:5,borderSkipped:false}]},options:{...base(),scales:{x:{grid:{color:gc()},ticks:{color:tc(),font:{size:10}}},y:{grid:{color:gc()},ticks:{color:tc(),font:{size:9},callback:v=>(v/1000).toFixed(0)+'K'}}}}});
+  }
+}
+
+// Bootstrap
+buildLegend('lg_trend',brands.map(b=>[b,bc[b]]));
+init(0);
+</script>
+</body>
+</html>
